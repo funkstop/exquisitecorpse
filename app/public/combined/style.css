@@ -1,0 +1,94 @@
+body {
+  background-color: #d1e0f4;
+  font-family: "Tsukimi Rounded", sans-serif;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.button-container button {
+  display: flex;
+  width: 40%;
+  justify-content: center;
+  padding: 20px;
+}
+
+.button {
+  background-color: transparent;
+  border: 3px solid #444444;
+  border-radius: 10px;
+  color: #444444;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.button:hover {
+  background-color: #444444;
+  color: #d1e0f4;
+}
+
+.button:disabled {
+  display: block !important; /* since you set the element's display to none inline,
+                                  we need to use !important flag (which is pretty bad)
+                                  to override the inline style */
+  pointer-events: none; /* Disable an element interaction, so it will not respond any event */
+  color: #888; /* Gray out the text color to signify being disabled */
+}
+
+.question-container {
+  display: flex;
+  justify-content: center;
+  font-size: 24px;
+  margin-top: 10px;
+}
+
+#finalResult {
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  align-items: center;
+  padding: 30px 30px;
+}
+
+#context {
+  background-image: url(https://cdn.glitch.global/b894e5db-d703-4bfa-8621-f12497d2e4d3/Screenshot%202023-11-07%20at%204.49.36%20PM.png?v=1699417345549);
+  background-repeat: repeat;
+  background-size: 70vw;
+  background-position: top;
+  padding: 30px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  background-color: white;
+}
+
+#text {
+  background-color: royalblue;
+  font-style: italic;
+  font-family: "Inconsolata", monospace;
+  font-size: 18px;
+  padding: 20px 20px;
+  text-align: justify;
+  opacity: 0.9;
+  line-height: 1.5;
+  color: floralwhite;
+}
+
+/* canvas{
+  background-color: white;
+}
+ */
+
+#spacer {
+  padding: 30px;
+}
+
+#instruction {
+  font-family: "Inconsolata", monospace;
+  font-size: 18px;
+  padding: 20px 20px;
+  text-align: justify;
+  line-height: 1.5;
+}

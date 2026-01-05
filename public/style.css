@@ -1,0 +1,18 @@
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.gallery-item {
+  border: 1px solid #444444;
+  border-color: black;
+  width: 400px;
+  float: left;
+  padding: 5px;
+  margin: 5px;
+}
+.gallery {
+  width: 100%;
+  display: flex;
+}

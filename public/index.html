@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gallery</title>
+    <link href="style.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Give+You+Glory&family=Inconsolata:wght@300&family=Tsukimi+Rounded&family=Yomogi&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="form-group">
+      <input
+        type="text"
+        class="form-control"
+        id="corpseName"
+        aria-describedby="emailHelp"
+        placeholder="Enter corpse name"
+        name="corpse_name"
+      />
+    </div>
+    <button id="submit" class="btn btn-primary">Create/Open New Corpse</button>
+    <br />
+
+    <p>Create a corpse or select an existing one by selecting 'Join'.</p>
+    <p>
+       if you play multiple times, you may need to 'reset' on the next page first. (known issue)
+    </p>
+    <p>
+      Use a unique name when prompted (we have not built the functionality for
+      duplicates yet)
+    </p>
+
+    <div id="gallery"></div>
+
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.js"></script>
+
+    <script src="app.js"></script>
+  </body>
+</html>

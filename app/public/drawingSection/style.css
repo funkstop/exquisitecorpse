@@ -1,0 +1,25 @@
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-image: url(https://www.checkatrade.com/blog/wp-content/uploads/2021/06/art-studio.jpg);
+  background-repeat: no-repeat;
+  background-size: 100vw;
+  background-color: #d1e0f4;
+  font-family: "Tsukimi Rounded", sans-serif;
+}
+
+p {
+  line-height: 1.5;
+  font-family: "Inconsolata", monospace;
+}
+
+canvas {
+  background-color: white;
+}
+
+#ins1 {
+  background-color: #d1e0f4;
+  width: 60vw;
+  opacity: 0.85;
+}
