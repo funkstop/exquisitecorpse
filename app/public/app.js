@@ -26,12 +26,13 @@ window.addEventListener("load", () => {
       body: jsonData,
     })
       .then((response) => {
-        console.log("got here in then statement")  
+        console.log("got here in then statement");
         let location = "/public/combined?corpseName=" + corpseName;
+        console.log(location);
         window.location.href = location;
       })
       .then((data) => {
-        console.log('printing data:');
+        console.log('printing data::');
         console.log(data);
       });
   });
