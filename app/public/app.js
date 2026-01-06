@@ -27,7 +27,7 @@ window.addEventListener("load", () => {
     })
       .then((response) => {
         console.log("got here in then statement")  
-        let location = "/app/public/combined?corpseName=" + corpseName;
+        let location = "/public/combined?corpseName=" + corpseName;
         window.location.href = location;
       })
       .then((data) => {
