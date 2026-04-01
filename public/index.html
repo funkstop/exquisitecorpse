@@ -3,43 +3,44 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gallery</title>
+    <title>Exquisite Corpse</title>
     <link href="style.css" rel="stylesheet" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Give+You+Glory&family=Inconsolata:wght@300&family=Tsukimi+Rounded&family=Yomogi&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Give+You+Glory&family=Inconsolata:wght@300&family=Tsukimi+Rounded&family=Yomogi&display=swap" rel="stylesheet"/>
   </head>
   <body>
-    <div class="form-group">
-      <input
-        type="text"
-        class="form-control"
-        id="corpseName"
-        aria-describedby="emailHelp"
-        placeholder="Enter corpse name"
-        name="corpse_name"
-      />
-    </div>
-    <button id="submit" class="btn btn-primary">Create/Open New Corpse</button>
-    <br />
-
-    <p>Create a corpse or select an existing one by selecting 'Join'.</p>
-    <p>
-       if you play multiple times, you may need to 'reset' on the next page first. (known issue)
-    </p>
-    <p>
-      Use a unique name when prompted (we have not built the functionality for
-      duplicates yet)
-    </p>
-
-    <div id="gallery"></div>
+    <header>
+      <h1>Exquisite Corpse</h1>
+      <p class="subtitle">A collaborative surrealist drawing game</p>
+      <button id="showCreate" class="btn-primary">+ Create New Corpse</button>
+      <div id="createForm" style="display:none">
+        <input type="text" id="corpseName" placeholder="Enter a unique corpse name" />
+        <button id="submit" class="btn-primary">Create</button>
+        <p id="createError" style="color:red;display:none"></p>
+      </div>
+    </header>
+    <section id="about">
+      <h2>What is Exquisite Corpse?</h2>
+      <p>
+        Exquisite Corpse is a collaborative drawing and writing game that was
+        originally developed by Surrealist artists in the early 20th century,
+        most notably André Breton and Yves Tanguy. The game is designed to be a
+        creative, spontaneous, and often humorous way for multiple participants
+        to collectively create an artwork or piece of writing.
+        <br />
+        <br />
+        The name "exquisite corpse" is said to have originated from the first
+        phrase created in the game, which was "The exquisite corpse shall drink
+        the new wine." This phrase was created by the Surrealist poets during
+        one of their early sessions of the game.
+      </p>
+    </section>
+    <main>
+      <h2>Active Corpses</h2>
+      <div id="gallery"></div>
+      <p id="emptyMsg" style="display:none">No corpses yet — create one above!</p>
+    </main>
 
     <script type="text/javascript" src="/socket.io/socket.io.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.js"></script>
-
     <script src="app.js"></script>
   </body>
 </html>

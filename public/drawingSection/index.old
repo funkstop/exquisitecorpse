@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selected Section</title>
+    <link href="style.css" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Give+You+Glory&family=Inconsolata:wght@300&family=Tsukimi+Rounded&family=Yomogi&display=swap" rel="stylesheet">
+</head>
+<body>
+  
+  <div id="instruction">
+    <h1>
+      Drawing Room
+    </h1>
+    <p id = "ins1">
+      1. draw inside the selected section for maximum 5 minutes.<br>
+      2. please have your drawing line(s) connect to the grey points inside the box.<br>
+      The purpose of this instruction is to have a final drawing as congruous as possible.<br>
+      3. click 'submit' button when you are done with drawing your section.<br>
+      4. click 'save' button if you wish to download your drawing as a file.<br>
+      5. have fun!!
+      <br>
+      6. Click on 'Gallery' to see your submitted section
+    </p>
+    </p>
+  </div>
+  
+    <div id="submit-section">
+      <button class="button" id="submit" disabled>Submit</button>
+      <button class="button" id="save">Save </button>
+    </div>
+  <div>
+    <p>
+      go to combined page to select a section
+    </p>
+    
+  </div>
+  <div>
+    <a href="/">Gallery</a>
+  </div>
+
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.js"></script>
+  
+    <script src="app.js"></script>
+</body>
+</html>

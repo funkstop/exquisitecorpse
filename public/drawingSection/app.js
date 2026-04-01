@@ -24,15 +24,9 @@ let outputCanvas;
 
 //preload images
 function preload() {
-  bgImages[0] = loadImage(
-    "https://cdn.glitch.global/b894e5db-d703-4bfa-8621-f12497d2e4d3/Section1_temp.png"
-  );
-  bgImages[1] = loadImage(
-    "https://cdn.glitch.global/b894e5db-d703-4bfa-8621-f12497d2e4d3/Section2_temp.png"
-  );
-  bgImages[2] = loadImage(
-    "https://cdn.glitch.global/b894e5db-d703-4bfa-8621-f12497d2e4d3/Section3_temp.png"
-  );
+  bgImages[0] = loadImage("Section1_temp.png");
+  bgImages[1] = loadImage("Section2_temp.png");
+  bgImages[2] = loadImage("Section3_temp.png");
 }
 
 /*
@@ -41,11 +35,12 @@ function preload() {
 /*/
 function setup() {
   currentColor = color(random(255), random(255), random(255));
-  const render = createCanvas(300, 150); //.parent('canvases');
+  const render = createCanvas(600, 300); //.parent('canvases');
   canvas = render.canvas;
   pixelDensity(1); //account for different resolutions
-  background(bgImages[0]); //default to the first image
-
+  background(bgImages[bgImageIndex]); //default to the first image
+  //background(255);
+  
   //create eventlistener for submit button. Initially disabled until section selected.
   document.getElementById("submit").addEventListener("click", function (event) {
     console.log("Submitting drawing... ");
@@ -57,9 +52,7 @@ function setup() {
     outputCanvas = select("#defaultCanvas0");
     console.log("The outputCanvas is: " + outputCanvas);
 
-    //copy(srcImage, sx, sy, sw, sh, dx, dy, dw, dh)
-    // copy(sx, sy, sw, sh, dx, dy, dw, dh)
-    // copy(0, 0, 250, 100, 0, 0, outputCanvas.width, outputCanvas.height);
+
 
     //get the embedded element which has the actual image and created it into an encoded datastream
     let tempElt = outputCanvas.elt;
@@ -77,7 +70,11 @@ function setup() {
       corpseName: currentCorpse,
     };
     drawingSectionSocket.emit("submitSection", fullObject);
-  });
+    setTimeout(() => {
+      localStorage.removeItem("selectedSection");
+      window.location.href = "/combined?corpseName=" + currentCorpse;
+      }, 1500);
+    });
 
   // Create event Listener for save button
   document.getElementById("save").addEventListener("click", function (event) {
@@ -111,7 +108,7 @@ function changeColor() {
 
 function eraseCanvas() {
   //Change the paintbrush color to white to erase
-  currentColor = 255;
+  currentColor = 125;
 }
 
 /*
@@ -123,7 +120,7 @@ function draw(datas) {
   noStroke();
   if (setBackgroundWhite == true) {
     // this shouldn't do anything because image is overlayed
-    background(255);
+    //background(255);
   }
   if (drawSection == true) {
     // is the draw boolean true
@@ -133,6 +130,7 @@ function draw(datas) {
       console.log("changing image");
       clear();
       background(bgImages[bgImageIndex]);
+     // background(255);
       imageChanged = false;
     }
     fill(datas.color.levels[0], datas.color.levels[1], datas.color.levels[2]);
@@ -166,19 +164,23 @@ window.addEventListener("load", () => {
   console.log(queryString);
   const urlParams = new URLSearchParams(queryString);
 
+
   let firstname = urlParams.get("firstName");
   if (!firstname) {
     console.log("no corpseName! this is going to break!"); // add better error handling!
   }
+ 
   
+  document.getElementById("sectionLabel").innerHTML = "Drawing: " + selectedSection + " of " + currentCorpse;
+  document.getElementById("backLink").href = "/combined?corpseName=" + currentCorpse;
   selectedSection = urlParams.get('section');
   
   currentCorpse = urlParams.get('corpseName');
 
   console.log("loaded!");
   //firstname = window.prompt("Enter your first name");
-  console.log(firstname);
-  console.log(selectedSection);
+  console.log("Firstname: " + firstname);
+  console.log("Selected Section: " + selectedSection);
   
   //update image
   if (selectedSection == "section-1") {
@@ -190,12 +192,12 @@ window.addEventListener("load", () => {
   }
   imageChanged = true;
   drawSection = true;
-  currentColor = color(random(200), random(200), random(200)); //lower than 255 so that it shows on white
+  currentColor = color(random(100), random(100), random(100)); //lower than 255 so that it shows on white
   enableSubmitButton();
- // draw();
+  draw();
 
   drawingSectionSocket.emit("privateDrawingRoom", { name: firstname });
-});
+}); 
 
 /*
 / socket.io on functions

@@ -1,25 +1,91 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
+  font-family: "Tsukimi Rounded", sans-serif;
+  background-color: #f0f4f8;
+  color: #333;
+}
+
+header {
+  background-color: #222;
+  color: white;
+  padding: 24px 40px;
+}
+
+.back-link {
+  color: #aaa;
+  text-decoration: none;
+  font-size: 0.9em;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.back-link:hover { color: white; }
+
+header h1 {
+  font-family: "Give You Glory", cursive;
+  font-size: 2.2em;
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  font-family: "Inconsolata", monospace;
+  opacity: 0.75;
+}
+
+main {
+  max-width: 700px;
+  margin: 30px auto;
+  padding: 0 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-image: url(https://www.checkatrade.com/blog/wp-content/uploads/2021/06/art-studio.jpg);
-  background-repeat: no-repeat;
-  background-size: 100vw;
-  background-color: #d1e0f4;
-  font-family: "Tsukimi Rounded", sans-serif;
+  gap: 20px;
 }
 
-p {
-  line-height: 1.5;
+#instructions {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  width: 100%;
   font-family: "Inconsolata", monospace;
+  line-height: 1.8;
 }
 
 canvas {
   background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
-#ins1 {
-  background-color: #d1e0f4;
-  width: 60vw;
-  opacity: 0.85;
+#controls {
+  display: flex;
+  gap: 12px;
 }
+
+.btn-primary {
+  background-color: royalblue;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-size: 1em;
+  cursor: pointer;
+  font-family: "Tsukimi Rounded", sans-serif;
+}
+
+.btn-primary:hover { background-color: #2244cc; }
+.btn-primary:disabled { background-color: #aaa; cursor: default; }
+
+.btn-secondary {
+  background-color: white;
+  color: #333;
+  border: 2px solid #333;
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-size: 1em;
+  cursor: pointer;
+  font-family: "Tsukimi Rounded", sans-serif;
+}
+
+.btn-secondary:hover { background-color: #eee; }

@@ -1,4 +1,4 @@
-let socket = io("/input");
+let socket = io("/drawingSection");
 
 let currentColor;
 let drawSection1 = false;
@@ -17,15 +17,9 @@ let myB;
 let outputCanvas;
 
 function preload() {
-  bgImages[0] = loadImage(
-    "https://cdn.glitch.global/b894e5db-d703-4bfa-8621-f12497d2e4d3/Section1_temp.png"
-  );
-  bgImages[1] = loadImage(
-    "https://cdn.glitch.global/b894e5db-d703-4bfa-8621-f12497d2e4d3/Section2_temp.png"
-  );
-  bgImages[2] = loadImage(
-    "https://cdn.glitch.global/b894e5db-d703-4bfa-8621-f12497d2e4d3/Section3_temp.png"
-  ); 
+  bgImages[0] = loadImage("Section1_temp.png");
+  bgImages[1] = loadImage("Section2_temp.png");
+  bgImages[2] = loadImage("Section3_temp.png"); 
 }
 
 function setup() {
@@ -83,15 +77,15 @@ function drawPos(pos) {
     line(pos.x1, pos.y1, pos.x2, pos.y2);
     stroke(pos.r, pos.g, pos.b);
     strokeWeight(4);
+  }
 }
 
 
-
 function mouseDragged() {
-    //grab mouse position
     let mousePos = { x1: pmouseX, y1: pmouseY, x2: mouseX, y2: mouseY, r: myR, g: myG, b: myB };
     socket.emit('data', mousePos);
-};
+    drawPos(mousePos); // draw locally immediately
+}
 
 
 window.addEventListener("load", () => {

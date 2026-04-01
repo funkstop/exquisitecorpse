@@ -87,8 +87,8 @@ app.post('/newCorpse',(req,res)=>{
   db.get("pTracker").then(documents => {
     console.log('in get corpse all')
     console.log(documents);
-    const specificDocument = null;
-    if (documents.data != null ) {
+    let specificDocument = null;
+    if (documents != null && documents.data != null ) {
      specificDocument = documents.find(doc => doc.name == req.body.corpse_name);
     }
    // console.log(specificDocument);
@@ -157,8 +157,47 @@ app.get('/getCorpse',  (req, res)=> {
   });
 });
 
+app.get('/clearDB', (req, res) => {
+    db.deleteAll("pTracker").then(() => res.send('cleared'));
+});
 
 function updateCorpseInDB(data) {
+  db.get("pTracker").then(documents => {
+    const index = documents.findIndex(doc => doc && doc.name == data.corpseName);
+    if (index === -1) { console.log('corpse not found!'); return; }
+    
+    const specificDocument = documents[index];
+    
+    if (specificDocument.image1Status==true && specificDocument.image2Status==true && specificDocument.image3Status==true) {
+      console.log('do nothing - already complete');
+      return;
+    }
+    
+    if (data.section == 'section-1') {
+      specificDocument.image1 = data.drawingData;
+      specificDocument.image1Status = true;
+    } else if (data.section == 'section-2') {
+      specificDocument.image2 = data.drawingData;
+      specificDocument.image2Status = true;
+    } else if (data.section == 'section-3') {
+      specificDocument.image3 = data.drawingData;
+      specificDocument.image3Status = true;
+    }
+    
+    if (specificDocument.image1Status==true && specificDocument.image2Status==true && specificDocument.image3Status==true) {
+      specificDocument.status = 'Complete';
+    }
+    
+    documents[index] = specificDocument;
+    
+    db.deleteAll("pTracker").then(() => {
+      db.push('pTracker', documents);
+    });
+  }).catch(error => console.error(error));
+}
+
+/*
+ function updateCorpseInDB(data) {
   console.log('update here')
   console.log(data);
   let docsToUpdate;
@@ -208,7 +247,7 @@ function updateCorpseInDB(data) {
   
 }
 
-
+*/
 
 
 // socket.io on Connection setups

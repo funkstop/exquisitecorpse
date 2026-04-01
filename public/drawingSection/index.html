@@ -1,50 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Selected Section</title>
-    <link href="style.css" rel="stylesheet"/>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Give+You+Glory&family=Inconsolata:wght@300&family=Tsukimi+Rounded&family=Yomogi&display=swap" rel="stylesheet">
-</head>
-<body>
-  
-  <div id="instruction">
-    <h1>
-      Drawing Room
-    </h1>
-    <p id = "ins1">
-      1. draw inside the selected section for maximum 5 minutes.<br>
-      2. please have your drawing line(s) connect to the grey points inside the box.<br>
-      The purpose of this instruction is to have a final drawing as congruous as possible.<br>
-      3. click 'submit' button when you are done with drawing your section.<br>
-      4. click 'save' button if you wish to download your drawing as a file.<br>
-      5. have fun!!
-      <br>
-      6. Click on 'Gallery' to see your submitted section
-    </p>
-    </p>
-  </div>
-  
-    <div id="submit-section">
-      <button class="button" id="submit" disabled>Submit</button>
-      <button class="button" id="save">Save </button>
-    </div>
-  <div>
-    <p>
-      go to combined page to select a section
-    </p>
-    
-  </div>
-  <div>
-    <a href="https://exquisitecorpse110823.glitch.me/">Gallery</a>
-  </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Drawing Section</title>
+    <link href="style.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Give+You+Glory&family=Inconsolata:wght@300&family=Tsukimi+Rounded&family=Yomogi&display=swap" rel="stylesheet"/>
+  </head>
+  <body>
+    <header>
+      <a href="#" id="backLink" class="back-link">← Back to Corpse</a>
+      <h1>Drawing Room</h1>
+      <p class="subtitle" id="sectionLabel"></p>
+    </header>
+
+    <main>
+      <div id="instructions">
+        <p>1. Draw inside the canvas below.</p>
+        <p>2. Connect your lines to the grey guide points at the edges.</p>
+        <p>3. Click <strong>Submit</strong> when done — this saves your section and returns you to the corpse.</p>
+        <p>4. Click <strong>Download</strong> to save a copy of your drawing locally.</p>
+      </div>
+
+      <div id="canvas-area"></div>
+
+      <div id="controls">
+        <button class="btn-primary" id="submit">Submit Drawing</button>
+        <button class="btn-secondary" id="save">Download</button>
+      </div>
+    </main>
 
     <script type="text/javascript" src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.js"></script>
-  
     <script src="app.js"></script>
-</body>
+  </body>
 </html>

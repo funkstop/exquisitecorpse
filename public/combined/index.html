@@ -3,90 +3,43 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Combined Corpse</title>
+    <title>Exquisite Corpse</title>
     <link href="style.css" rel="stylesheet" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Give+You+Glory&family=Inconsolata:wght@300&family=Tsukimi+Rounded&family=Yomogi&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Give+You+Glory&family=Inconsolata:wght@300&family=Tsukimi+Rounded&family=Yomogi&display=swap" rel="stylesheet"/>
   </head>
   <body>
-    <div id="context">
-      <h1>Exquisite Corpse</h1>
-      <h2>Background</h2>
-      <p id="text">
-        Exquisite Corpse is a collaborative drawing and writing game that was
-        originally developed by Surrealist artists in the early 20th century,
-        most notably André Breton and Yves Tanguy. The game is designed to be a
-        creative, spontaneous, and often humorous way for multiple participants
-        to collectively create an artwork or piece of writing.
-        <br />
-        <br />
-        The name "exquisite corpse" is said to have originated from the first
-        phrase created in the game, which was "The exquisite corpse shall drink
-        the new wine." This phrase was created by the Surrealist poets during
-        one of their early sessions of the game.
-      </p>
-    </div>
+    <header>
+      <a href="/" class="back-link">← Gallery</a>
+      <h1>Exquisite Corpse: <span id="cName"></span></h1>
+      <p class="subtitle">Choose an available section to draw</p>
+    </header>
 
-    <!--   <p>I should be able to change this so the output and input are the same page if we want. for now, i'm just confirming i can get the code to work  </p>
-       -->
-    <div id="spacer"></div>
+    <main>
+      <div class="sections">
 
-    <div id="finalResult">
-      <h1>Select a section to Draw</h1>
-      <h2>You are drawing: <span id="cName"> </span></h2>
+        <div class="section-card" id="card-1">
+          <h2>Section 1</h2>
+          <img id="img-1" src="/drawingSection/Section1_temp.png" width="100%"/>
+          <p class="section-meta" id="meta-1">Available</p>
+          <button class="btn-section" id="section-1">Draw Section 1</button>
+        </div>
 
-      <div id="final1"></div>
-      <div id="final2"></div>
-      <div id="final3"></div>
+        <div class="section-card" id="card-2">
+          <h2>Section 2</h2>
+          <img id="img-2" src="/drawingSection/Section2_temp.png" width="100%"/>
+          <p class="section-meta" id="meta-2">Available</p>
+          <button class="btn-section" id="section-2">Draw Section 2</button>
+        </div>
 
-      <!--     saving all the drawing together -->
+        <div class="section-card" id="card-3">
+          <h2>Section 3</h2>
+          <img id="img-3" src="/drawingSection/Section3_temp.png" width="100%"/>
+          <p class="section-meta" id="meta-3">Available</p>
+          <button class="btn-section" id="section-3">Draw Section 3</button>
+        </div>
 
-      <!--     <button id= "saveCompleted">Save</button><br/> -->
-      <!--     
-    <div id= "haha">
-      You can't have this drawing because it's too precious!
-    </div>
-     -->
-
-      <p id="instruction">
-        Instructions:
-        <br />
-        1. type in your first name in the diologue box. If you don't see it,
-        refresh the page.
-        <br />2. select a section from the choices below. 
-      </p>
-      <button id="resetCorpse">Leave/Reset Corpse</button>
-      <br />
-      <a href="/drawingSection" target="_blank">Go to Drawing Section</a> <br />
-    </div>
-
-    <div class="canvas" id="canvas1">
-      <img
-        src="https://cdn.glitch.global/b894e5db-d703-4bfa-8621-f12497d2e4d3/Section1_temp.png"
-        width="500"
-      />
-      <button class="button" id="section-1">Click for Section 1</button>
-    </div>
-    <div class="canvas" id="canvas2">
-      <img
-        src="https://cdn.glitch.global/b894e5db-d703-4bfa-8621-f12497d2e4d3/Section2_temp.png"
-        width="500"
-      />
-      <button class="button" id="section-2">Click for Section 2</button>
-    </div>
-    <div class="canvas" id="canvas3">
-      <img
-        src="https://cdn.glitch.global/b894e5db-d703-4bfa-8621-f12497d2e4d3/Section3_temp.png"
-        width="500"
-      />
-      <button class="button" id="section-3">Click for Section 3</button>
-    </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.js"></script>
+      </div>
+    </main>
 
     <script type="text/javascript" src="/socket.io/socket.io.js"></script>
     <script src="app.js"></script>
