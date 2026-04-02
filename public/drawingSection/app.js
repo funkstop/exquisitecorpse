@@ -134,7 +134,9 @@ function draw(datas) {
       imageChanged = false;
     }
     fill(datas.color.levels[0], datas.color.levels[1], datas.color.levels[2]);
-    ellipse(datas.x, datas.y, 4, 4);
+    let size = document.getElementById("brushSize").value;
+    ellipse(datas.x, datas.y, size, size);
+    //ellipse(datas.x, datas.y, 4, 4);
   }
 }
 
@@ -143,6 +145,7 @@ function draw(datas) {
 / When mouse is dragged,send the data (mouse position, current ellipse color) to the canvas
 /
 */
+/*
 function mouseDragged(event) {
   //Grab (x & y & color), and set these datas into the object 'clientdraw'
   let clientdraw = {
@@ -152,6 +155,16 @@ function mouseDragged(event) {
   };
   //force call draw
   draw(clientdraw);
+}
+*/
+function mouseDragged(event) {
+  let steps = 10;
+  for (let i = 0; i < steps; i++) {
+    let x = lerp(pmouseX, mouseX, i / steps);
+    let y = lerp(pmouseY, mouseY, i / steps);
+    let clientdraw = { x: x, y: y, color: currentColor };
+    draw(clientdraw);
+  }
 }
 
 /*

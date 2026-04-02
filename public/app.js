@@ -162,17 +162,16 @@ fetch("/getGallery")
         { label: "Section 2", status: corpse.image2Status },
         { label: "Section 3", status: corpse.image3Status },
       ];
-[1,2,3].forEach(n => {
-          if (corpse["image" + n]) {
-            let img = document.createElement("img");
-            img.src = corpse["image" + n];
-            img.style.width = "100%";
-            img.style.marginTop = "6px";
-            img.style.borderRadius = "6px";
-            galleryDiv.appendChild(img);
-          }
-        });
+     [1,2,3].forEach(n => {
+       let img = document.createElement("img");
+       img.src = corpse["image" + n] || "drawingSection/Section" + n + "_temp.png";
+       img.style.width = "100%";
+       img.style.marginTop = "6px";
+       img.style.borderRadius = "6px";
+       galleryDiv.appendChild(img);
+     });
 
+   
       sections.forEach(s => {
         let p = document.createElement("p");
         p.className = "section-status" + (s.status === true ? " done" : "");
