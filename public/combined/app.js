@@ -89,7 +89,7 @@ window.addEventListener("load", () => {
   // Someone submitted — mark as done
   combinedSocket.on("updateCombinedCanvas", (data) => {
     let n = parseInt(data.section.replace("section-", ""));
-    setSectionDone(n);
+    setSectionDone(n,);
     document.getElementById("img-" + n).src = data.drawingData;
   });
 
@@ -106,7 +106,7 @@ window.addEventListener("load", () => {
   });
 });
 
-function setSectionDone(n) {
+function setSectionDone(n, artist) {
   let btn = document.getElementById("section-" + n);
   let meta = document.getElementById("meta-" + n);
   btn.disabled = true;
