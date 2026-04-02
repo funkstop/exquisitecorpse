@@ -13,7 +13,6 @@ window.addEventListener("load", () => {
 
   document.getElementById("cName").innerHTML = corpseName;
 
-  // Check if corpse exists, redirect if not
   fetch("/getCorpse?" + new URLSearchParams({ corpseName }))
     .then(res => res.json())
     .then(data => {
@@ -21,75 +20,89 @@ window.addEventListener("load", () => {
         window.location.href = "/";
         return;
       }
-
-      // Disable sections that are already submitted
       if (data.data.image1Status === true) {
-         setSectionDone(1);
-         document.getElementById("img-1").src = data.data.image1;
+        setSectionDone(1, data.data.image1Artist);
+        document.getElementById("img-1").src = data.data.image1;
       }
       if (data.data.image2Status === true) {
-         setSectionDone(2);
-         document.getElementById("img-2").src = data.data.image2;
+        setSectionDone(2, data.data.image2Artist);
+        document.getElementById("img-2").src = data.data.image2;
       }
       if (data.data.image3Status === true) {
-         setSectionDone(3);
-         document.getElementById("img-3").src = data.data.image3;
+        setSectionDone(3, data.data.image3Artist);
+        document.getElementById("img-3").src = data.data.image3;
       }
-      // Show completed corpse if all done
       if (data.data.status === "Complete") {
         showCompleted(data.data);
       }
-   //   ["1","2","3"].forEach(n => {
-   //     if (data.data["image" + n]) {
-   //       let img = document.createElement("img");
-   //       img.src = data.data["image" + n];
-   //       img.style.width = "100%";
-   //       img.style.marginTop = "8px";
-   //       img.style.borderRadius = "6px";
-   //       document.getElementById("final" + n).appendChild(img);
-   //     }
-   //   });
     });
-
-  // Check localStorage for already-selected section
-  const sessionDataString = localStorage.getItem("selectedSection");
-  if (sessionDataString) {
-    let sessionData = JSON.parse(sessionDataString);
-    if (sessionData.corpseName === corpseName) {
-      firstname = sessionData.firstname;
-      setSectionTaken(parseInt(sessionData.section.replace("section-", "")), "You");
-    }
-  }
-
-  // Prompt for name if not stored
-//  if (!firstname) {
-  //  firstname = window.prompt("Enter your first name");
- // }
 
   firstname = localStorage.getItem("firstname");
   if (!firstname) {
-    firstname = window.prompt("Enter your first name");
+    firstname = window.prompt("Enter your artist name");
     localStorage.setItem("firstname", firstname);
   }
 
-  combinedSocket.corpseName = corpseName;
   combinedSocket.emit("privateDrawingRoom", { name: firstname, corpseRoom: corpseName });
   combinedSocket.emit("corpseRoom", { name: corpseName });
 
-  // Section button listeners
+  // Section button listeners — wait for server lock grant before redirecting
   [1, 2, 3].forEach(n => {
     document.getElementById("section-" + n).addEventListener("click", () => {
+      console.log('selectCanvas emitting');
       let section = "section-" + n;
-      localStorage.setItem("selectedSection", JSON.stringify({ corpseName, section, firstname }));
+      console.log('about to select ' + section + ' ' + corpseName);
       combinedSocket.emit("selectedCanvas", { corpseName, section });
-      window.location.href = `/drawingSection?corpseName=${corpseName}&section=${section}&firstName=${firstname}`;
     });
   });
 
-  // Someone else selected a section
-  combinedSocket.on("canvasSelected", (data) => {
+  console.log('after for each');
+  // Server granted the lock — now redirect
+  combinedSocket.on("lockGranted", (data) => {
+    console.log('about to grant');
+    let section = data.section;
+    localStorage.setItem("selectedSection", JSON.stringify({ corpseName, section, firstname }));
+    window.location.href = `/drawingSection?corpseName=${corpseName}&section=${section}&firstName=${firstname}`;
+  });
+
+  // Server denied the lock — someone else has it
+  combinedSocket.on("lockDenied", (data) => {
+    console.log('lockDenied');
     let n = parseInt(data.section.replace("section-", ""));
-    setSectionTaken(n, data.name || "Someone");
+    setSectionTaken(n, "Someone");
+    alert("Sorry, someone else just grabbed that section!");
+  });
+
+  // Another user locked a section
+  combinedSocket.on("sectionLocked", (data) => {
+    console.log('sectionLocked');
+    let n = parseInt(data.section.replace("section-", ""));
+    setSectionTaken(n, "Someone");
+  });
+
+  // A user disconnected — section is available again
+  combinedSocket.on("sectionUnlocked", (data) => {
+    let n = parseInt(data.section.replace("section-", ""));
+    setSectionAvailable(n);
+  });
+
+  // Someone submitted — mark as done
+  combinedSocket.on("updateCombinedCanvas", (data) => {
+    let n = parseInt(data.section.replace("section-", ""));
+    setSectionDone(n);
+    document.getElementById("img-" + n).src = data.drawingData;
+  });
+
+  combinedSocket.on("currentLocks", (data) => {
+    data.locks.forEach(lock => {
+      let n = parseInt(lock.section.replace("section-", ""));
+      if (lock.status === 'done') {
+        // already handled by DB fetch, but just in case
+        setSectionDone(n);
+      } else {
+        setSectionTaken(n, "Someone");
+      }
+    });
   });
 });
 
@@ -98,7 +111,7 @@ function setSectionDone(n) {
   let meta = document.getElementById("meta-" + n);
   btn.disabled = true;
   btn.innerHTML = "Submitted";
-  meta.innerHTML = "✓ Complete";
+  meta.innerHTML = "✓ " + (artist ? "drawn by " + artist: "Complete");
   meta.className = "section-meta done";
 }
 
@@ -111,6 +124,15 @@ function setSectionTaken(n, who) {
   meta.className = "section-meta taken";
 }
 
+function setSectionAvailable(n) {
+  let btn = document.getElementById("section-" + n);
+  let meta = document.getElementById("meta-" + n);
+  btn.disabled = false;
+  btn.innerHTML = "Draw Section " + n;
+  meta.innerHTML = "Available";
+  meta.className = "section-meta";
+}
+
 function showCompleted(data) {
   document.getElementById("completedResult").style.display = "block";
   ["1","2","3"].forEach(n => {
@@ -119,9 +141,3 @@ function showCompleted(data) {
     document.getElementById("final" + n).appendChild(img);
   });
 }
-
-function disableSection(section) {
-  let n = parseInt(section.replace("section-", ""));
-  setSectionTaken(n, "You");
-}
-

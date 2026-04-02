@@ -1,291 +1,127 @@
 let combinedSocket = io("/combined");
 let corpseName;
 let firstname;
-//could 'auto open' pages
-//window.open('https://experienced-gleaming-telephone.glitch.me/drawingSection','_blank');
 
-/*
- * Add eventlistener on window load
- * extract corpsename from url parameters
- *
- */
 window.addEventListener("load", () => {
-  const queryString = window.location.search;
-  console.log(queryString);
-  const urlParams = new URLSearchParams(queryString);
-
+  const urlParams = new URLSearchParams(window.location.search);
   corpseName = urlParams.get("corpseName");
+
   if (!corpseName) {
-    console.log("no corpseName! this is going to break!"); // add better error handling!
+    window.location.href = "/";
+    return;
   }
-  
-  const endpoint='/getCorpse';
-  const params = { corpseName: corpseName}
-  const queryStringInit = new URLSearchParams(params).toString();
 
-  let url = `${endpoint}?${queryStringInit}`;
+  document.getElementById("cName").innerHTML = corpseName;
 
-  fetch(url)
-  .then(res => res.json()) // todo: redirect to drawingSection here. Extract json?
-  .then(data => {
-    console.log(data); // if want to show images here, we could
-    if (data.data.image1 != null) {
-      let elt = document.getElementById("section-1")
-      elt.innerHTML = "Completed";
-      elt.disabled = true;
-    }
-    if (data.data.image2 != null) {
-      let elt = document.getElementById("section-2")
-      elt.innerHTML = "Completed";
-      elt.disabled = true;
-      
-    }
-    if (data.data.image3 != null) {
-      let elt = document.getElementById("section-3")
-      elt.innerHTML = "Completed";
-      elt.disabled = true;
-      
-    }
-  })
+  // Check if corpse exists, redirect if not
+  fetch("/getCorpse?" + new URLSearchParams({ corpseName }))
+    .then(res => res.json())
+    .then(data => {
+      if (!data.data) {
+        window.location.href = "/";
+        return;
+      }
 
-  
-  
-  const sessionDataString = localStorage.getItem("selectedSection"); //update this to be associated with corpsename as well.
-  console.log(sessionDataString);
+      // Disable sections that are already submitted
+      if (data.data.image1Status === true) {
+         setSectionDone(1);
+         document.getElementById("img-1").src = data.data.image1;
+      }
+      if (data.data.image2Status === true) {
+         setSectionDone(2);
+         document.getElementById("img-2").src = data.data.image2;
+      }
+      if (data.data.image3Status === true) {
+         setSectionDone(3);
+         document.getElementById("img-3").src = data.data.image3;
+      }
+      // Show completed corpse if all done
+      if (data.data.status === "Complete") {
+        showCompleted(data.data);
+      }
+   //   ["1","2","3"].forEach(n => {
+   //     if (data.data["image" + n]) {
+   //       let img = document.createElement("img");
+   //       img.src = data.data["image" + n];
+   //       img.style.width = "100%";
+   //       img.style.marginTop = "8px";
+   //       img.style.borderRadius = "6px";
+   //       document.getElementById("final" + n).appendChild(img);
+   //     }
+   //   });
+    });
 
+  // Check localStorage for already-selected section
+  const sessionDataString = localStorage.getItem("selectedSection");
   if (sessionDataString) {
     let sessionData = JSON.parse(sessionDataString);
-    console.log(sessionData.corpseName);
-    console.log(corpseName);
-    if (
-      sessionData.corpseName != null &&
-      sessionData.corpseName == corpseName
-    ) {
-      console.log("corpseName and session in local storage already");
-      firstname = corpseName;
-      disableSection(sessionData.section);
+    if (sessionData.corpseName === corpseName) {
+      firstname = sessionData.firstname;
+      setSectionTaken(parseInt(sessionData.section.replace("section-", "")), "You");
     }
-  } else {
-    console.log("corpseName and session not in local storage already");
-    firstname = window.prompt("Enter your first name");
   }
 
-  console.log(firstname);
+  // Prompt for name if not stored
+//  if (!firstname) {
+  //  firstname = window.prompt("Enter your first name");
+ // }
 
-  let dispCname = document.getElementById("cName");
-  dispCname.innerHTML = corpseName;
+  firstname = localStorage.getItem("firstname");
+  if (!firstname) {
+    firstname = window.prompt("Enter your first name");
+    localStorage.setItem("firstname", firstname);
+  }
 
   combinedSocket.corpseName = corpseName;
-  combinedSocket.emit("privateDrawingRoom", {
-    name: firstname,
-    corpseRoom: corpseName,
-  });
+  combinedSocket.emit("privateDrawingRoom", { name: firstname, corpseRoom: corpseName });
   combinedSocket.emit("corpseRoom", { name: corpseName });
 
-  document.getElementById("section-1").addEventListener("click", (event) => {
-    // todo: add details from the canvas (points, section, etc). Can be hard coded initially?
-    // todo: disable selected canvas and associate with socket id that selected it?
-    event.target.innerHTML = "Disabled!";
-    event.target.disabled = true;
-    let fullObject = { corpseName: corpseName, section: "section-1" };
-    const endpoint='/getCorpse';
-    const params = { corpseName: corpseName}
-    const queryString = new URLSearchParams(params).toString();
-
-    let url = `${endpoint}?${queryString}`;
-
-    fetch(url)
-    .then(res => res.json()) // todo: redirect to drawingSection here. Extract json?
-    .then(data => {
-      console.log(data.corpseName);
-      let location = "/drawingSection?corpseName=" + corpseName + '&section=section-1&firstname='+firstname;
-      console.log(location)
-       window.location.href = location;
-    })
-    
-    
-    combinedSocket.emit("selectedCanvas", fullObject);
-    selectSection("section-1");
-  });
-  document.getElementById("section-2").addEventListener("click", (event) => {
-    // todo: add details from the canvas (points, section, etc). Can be hard coded initially?
-    // todo: disable selected canvas and associate with socket id that selected it?
-    event.target.innerHTML = "Disable Selection!";
-    event.target.disabled = true;
-    let fullObject = { corpseName: corpseName, section: "section-2" };
-    const endpoint='/getCorpse';
-    const params = { corpseName: corpseName}
-    const queryString = new URLSearchParams(params).toString();
-
-    let url = `${endpoint}?${queryString}`;
-
-    fetch(url)
-    .then(res => res.json()) // todo: redirect to drawingSection here. Extract json?
-    .then(data => {
-      console.log(data.corpseName);
-      let location = "/drawingSection?corpseName=" + corpseName + '&section=section-2&firstname='+firstname;
-      console.log(location)
-       window.location.href = location;
-    })
-    
-    
-    
-    combinedSocket.emit("selectedCanvas", fullObject);
-    selectSection("section-2");
-  });
-  document.getElementById("section-3").addEventListener("click", (event) => {
-    // todo: add details from the canvas (points, section, etc). Can be hard coded initially?
-    // todo: disable selected canvas and associate with socket id that selected it?
-    event.target.innerHTML = "Disable Selection!";
-    event.target.disabled = true;
-    let fullObject = { corpseName: corpseName, section: "section-3" };
-    const endpoint='/getCorpse';
-    const params = { corpseName: corpseName}
-    const queryString = new URLSearchParams(params).toString();
-
-    let url = `${endpoint}?${queryString}`;
-
-    fetch(url)
-    .then(res => res.json()) // todo: redirect to drawingSection here. Extract json?
-    .then(data => {
-      console.log(data.corpseName);
-      let location = "/drawingSection?corpseName=" + corpseName + '&section=section-3&firstname='+firstname;
-      console.log(location)
-       window.location.href = location;
-    })
-    
-    
-    combinedSocket.emit("selectedCanvas", fullObject);
-    selectSection("section-3");
-    //window.location.href='/drawingSection';
-    // to do the above, would need to send section and room.
-  });
-
-  //set eventlistener for reset Corpse -- not really 'exiting'
-  document.getElementById("resetCorpse").addEventListener("click", function () {
-    localStorage.removeItem("selectedSection");
-    // Reset the UI
-    const buttons = document.querySelectorAll(".button");
-
-    buttons.forEach((button) => {
-      button.innerHTML = "Click for " + button.id.charAt(button.id.length - 1);
-      button.disabled = false;
+  // Section button listeners
+  [1, 2, 3].forEach(n => {
+    document.getElementById("section-" + n).addEventListener("click", () => {
+      let section = "section-" + n;
+      localStorage.setItem("selectedSection", JSON.stringify({ corpseName, section, firstname }));
+      combinedSocket.emit("selectedCanvas", { corpseName, section });
+      window.location.href = `/drawingSection?corpseName=${corpseName}&section=${section}&firstName=${firstname}`;
     });
-
-    document.getElementById("canvas1").style.opacity = 100;
-    document.getElementById("canvas2").style.opacity = 100;
-    document.getElementById("canvas3").style.opacity = 100;
   });
 
-  /*
-  let saveAll = document.getElementById('saveCompleted');
-    saveAll.addEventListener('click', function(){
-  
-    let canvas = document.getElementById('allDrawing'); 
-    let fileName = "exquisiteCorpse_" + Date() + ".png";
-    saveCanvas(canvas, fileName, "png");
-  
-    });
-*/
+  // Someone else selected a section
+  combinedSocket.on("canvasSelected", (data) => {
+    let n = parseInt(data.section.replace("section-", ""));
+    setSectionTaken(n, data.name || "Someone");
+  });
 });
 
-/*
- * set up p5js canvas. Doesn't do anything at present but still required.
- *
- */
-function setup() {}
-
-//socket.io on functions
-
-/*
- * placeholder for a callback potentially to update the common corpse page, kept separate
- *
- */
-combinedSocket.on("updateCorpse", (data) => {
-  console.log(data);
-});
-
-/*
- * updates the corpse page when drawing is submitted.
- * received the png of the file and then reconstructs it and places it in the desired canvas
- *
- */
-combinedSocket.on("updateCombinedCanvas", (data) => {
-  console.log(data);
-  var newImage = new Image();
-  newImage.onload = function () {
-    console.log("newImage.onload");
-    // Assuming 'myCanvas' is the ID of your canvas element
-    var finalLocation = document.getElementById("finalResult");
-    console.log(finalLocation);
-
-    let newSection;
-    var canvas = document.createElement("canvas");
-    canvas.id = "myCanvas";
-    if (data.section == "section-1") {
-      newSection = "final1";
-    } else if (data.section == "section-2") {
-      newSection = "final2";
-    } else {
-      newSection = "final3";
-    }
-
-    document.getElementById(newSection).appendChild(canvas);
-    var context = canvas.getContext("2d");
-    context.drawImage(newImage, 0, 0);
-  };
-  console.log("Combined:updateCombinedCanvas: got here");
-
-  newImage.onerror = function () {
-    console.error("The image could not be loaded.");
-  };
-
-  console.log("Combined:updateCombinedCanvas: got here2");
-  let drawingImage = data.drawingData;
-  if (drawingImage != null) {
-    console.log("Found a drawing Image");
-    newImage.src = drawingImage.toString();
-  } //else find some sort of funny image to show instead?
-
-  console.log(data);
-});
-
-/*
- * this is called by the button event listener.
- * stores selected section and corpse in localstorage and calls disableSection as well
- *
- */
-function selectSection(section) {
-  let sessionData = { corpseName, section };
-  localStorage.setItem("selectedSection", JSON.stringify(sessionData)); // Save the selected section to localStorage
-  console.log("calling disable");
-  disableSection(section);
+function setSectionDone(n) {
+  let btn = document.getElementById("section-" + n);
+  let meta = document.getElementById("meta-" + n);
+  btn.disabled = true;
+  btn.innerHTML = "Submitted";
+  meta.innerHTML = "✓ Complete";
+  meta.className = "section-meta done";
 }
 
-/*
- * this is called by the select Section via button listener.
- * disables buttons and covers up other sections.
- *
- */
+function setSectionTaken(n, who) {
+  let btn = document.getElementById("section-" + n);
+  let meta = document.getElementById("meta-" + n);
+  btn.disabled = true;
+  btn.innerHTML = "In Progress";
+  meta.innerHTML = who + " is drawing this";
+  meta.className = "section-meta taken";
+}
+
+function showCompleted(data) {
+  document.getElementById("completedResult").style.display = "block";
+  ["1","2","3"].forEach(n => {
+    let img = document.createElement("img");
+    img.src = data["image" + n];
+    document.getElementById("final" + n).appendChild(img);
+  });
+}
+
 function disableSection(section) {
-  console.log("called disabled");
-  // Get all buttons and disable the selected one
-  const buttons = document.querySelectorAll(".button");
-  buttons.forEach((button) => {
-    if (button.id === section) {
-      button.innerHTML = "Disabled!";
-      button.disabled = true;
-    }
-  });
-
-  if (section == "section-1") {
-    document.getElementById("canvas2").style.opacity = 0.1;
-    document.getElementById("canvas3").style.opacity = 0.1;
-  } else if (section == "section-2") {
-    document.getElementById("canvas1").style.opacity = 0.1;
-    document.getElementById("canvas3").style.opacity = 0.1;
-  } else if (section == "section-3") {
-    document.getElementById("canvas1").style.opacity = 0.1;
-    document.getElementById("canvas2").style.opacity = 0.1;
-  }
+  let n = parseInt(section.replace("section-", ""));
+  setSectionTaken(n, "You");
 }
+

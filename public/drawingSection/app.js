@@ -68,6 +68,7 @@ function setup() {
       drawingData: drawingData,
       section: selectedSection,
       corpseName: currentCorpse,
+      firstname: firstname,
     };
     drawingSectionSocket.emit("submitSection", fullObject);
     setTimeout(() => {
@@ -209,7 +210,11 @@ window.addEventListener("load", () => {
   enableSubmitButton();
   draw();
 
-  drawingSectionSocket.emit("privateDrawingRoom", { name: firstname });
+  drawingSectionSocket.emit("privateDrawingRoom", { 
+    name: firstname, 
+    corpseRoom: currentCorpse, 
+    section: selectedSection 
+  });
 }); 
 
 /*

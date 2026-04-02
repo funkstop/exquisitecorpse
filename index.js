@@ -7,7 +7,6 @@ require('dotenv').config();
 
 let app = express();
 
-
 const { TextEncoder } = require('util');
 global.TextEncoder = TextEncoder;
 
@@ -17,8 +16,6 @@ global.TextDecoder = TextDecoder;
 app.use(express.json());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
-
-
 
 // Database and Collection references
 let database;
@@ -45,7 +42,6 @@ server.listen(port, () => {
     console.log("Server listening at port: " + port);
 });
 
-
 //Initialize socket.io
 let io = require('socket.io');
 io = new io.Server(server);
@@ -54,36 +50,33 @@ let combined = io.of('/combined');
 let drawingSection = io.of('/drawingSection');
 let gallery = io.of('');
 
+// Section locks: { "corpseName::section-1": socketId or 'done' }
+const locks = {};
+const ipCreations = {}; // { ip: [timestamps] }
+
+function isRateLimited(ip) {
+  const now = Date.now();
+  const window = 15 * 60 * 1000; // 15 minutes
+  if (!ipCreations[ip]) ipCreations[ip] = [];
+  ipCreations[ip] = ipCreations[ip].filter(t => now - t < window);
+  if (ipCreations[ip].length >= 5) return true;
+  ipCreations[ip].push(now);
+  return false;
+}
+
 var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 app.post('/', urlencodedParser, (req, res) => {
-    // what this should do: create a new corpse below with a new room.
-    // it should redirect the person who created it, to combined but within that room
-  // others can select the same corpse to keep that same room. should be persistent somehow
     console.log('Got create corpse post:', req.body.corpse_name);
-    // should the below be a fetch request?
     res.redirect('/combined?corpseName=' + req.body.corpse_name);
 });
 
-
-/*
-// POST route for saving data
-app.post('/save', async (req, res) => {
-    try {
-        const result = await collection.insertOne(req.body);
-        res.status(201).send(`Document inserted with _id: ${result.insertedId}`);
-    } catch (e) {
-        res.status(500).send("Error saving data: " + e.message);
-    }
-});
-*/
-
-//called from initial page when create new is called
 app.post('/newCorpse',(req,res)=>{
- // console.log(req.body);
   console.log('got to post: newCorpse');  
-  
-  // check if corpse exists:
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  if (isRateLimited(ip)) {
+    return res.json({ task: "rate_limited" });
+  }
   db.get("pTracker").then(documents => {
     console.log('in get corpse all')
     console.log(documents);
@@ -91,16 +84,11 @@ app.post('/newCorpse',(req,res)=>{
     if (documents != null && documents.data != null ) {
      specificDocument = documents.find(doc => doc.name == req.body.corpse_name);
     }
-   // console.log(specificDocument);
     if (specificDocument != null) {
       console.log('already exists!');
-      res.json({task:"already_exists", 
-                'corpseName': req.body.corpse_name
-               });
+      res.json({task:"already_exists", 'corpseName': req.body.corpse_name});
     } else {
-            //otherwise continue
       console.log('still getting here...');
-
       let obj = {
         status:'new',
         name: req.body.corpse_name,
@@ -116,43 +104,28 @@ app.post('/newCorpse',(req,res)=>{
       } else {
         db.push("pTracker",obj);
       }
-      res.json({task:"sucess", 
-                'corpseName': req.body.corpse_name, 
-               });
+      res.json({task:"sucess", 'corpseName': req.body.corpse_name});
     }
   }).catch(error => {
-    // Handle error
     console.error(error);
   });
-  
 });
 
- //get all corpses in the db
 app.get('/getGallery',(req,res)=>{
-//  collection.findAll
   db.get("pTracker").then(pData =>{
     let obj = {data: pData};
     res.json(obj);
-    })
-  //db.*deleteAll("pTracker");  Do NOT UNCOMMENT!!! THIS DELETES THE DB!! 
+  })
 })
 
-
-app.get('/getCorpse',  (req, res)=> {
+app.get('/getCorpse', (req, res)=> {
   console.log('in get corpse')
-  console.log(req.query);
   let corpseName = req.query.corpseName;
   db.get("pTracker").then(documents => {
-    console.log('in get corpse all')
-   // console.log(documents);
-   // console.log(req);
     const specificDocument = documents.find(doc => doc.name == corpseName);
     let obj = {data: specificDocument}
     res.json(obj);
-    console.log(specificDocument);
-  }
-    ).catch(error => {
-    // Handle error
+  }).catch(error => {
     console.error(error);
   });
 });
@@ -176,12 +149,15 @@ function updateCorpseInDB(data) {
     if (data.section == 'section-1') {
       specificDocument.image1 = data.drawingData;
       specificDocument.image1Status = true;
+      specificDocument.image1Artist = data.firstname;
     } else if (data.section == 'section-2') {
       specificDocument.image2 = data.drawingData;
       specificDocument.image2Status = true;
+      specificDocument.image2Artist = data.firstname;
     } else if (data.section == 'section-3') {
       specificDocument.image3 = data.drawingData;
       specificDocument.image3Status = true;
+      specificDocument.image3Artist = data.firstname;
     }
     
     if (specificDocument.image1Status==true && specificDocument.image2Status==true && specificDocument.image3Status==true) {
@@ -196,87 +172,25 @@ function updateCorpseInDB(data) {
   }).catch(error => console.error(error));
 }
 
-/*
- function updateCorpseInDB(data) {
-  console.log('update here')
-  console.log(data);
-  let docsToUpdate;
-  db.get("pTracker").then(documents => {
-    console.log(documents);
-    const specificDocument = documents.find(doc => doc.name == data.corpseName);
-    let index = documents.find(doc=> doc.name == data.corpseName);
-   // let obj = {data: specificDocument}
-   // res.json(obj);
-    if ((specificDocument.image1Status==true)&&(specificDocument.image2Status==true)&&(specificDocument.image3Status==true))
-    {
-      console.log('do nothing'); // someone beat them -- long run fix the race condition
-      return;
-    }
-    
-    if (data.section == 'section-1') {
-      specificDocument.image1=data.drawingData;
-    specificDocument.image1Status = true;
-    } else if (data.section == 'section-2') {
-      specificDocument.image2=data.drawingData;
-    specificDocument.image2Status = true;
-    } else if (data.section == 'section-3') {
-      specificDocument.image3=data.drawingData;
-      specificDocument.image3Status = true;
-    }
-    
-    if ((specificDocument.image1Status==true)&&(specificDocument.image2Status==true)&&(specificDocument.image3Status==true))
-    {
-      specificDocument.status='Complete'
-    }
-    console.log('specificDocument: ')
-    console.log(specificDocument);
-    documents[index] = specificDocument;
-    docsToUpdate = documents;
-
-
-  }
-    ).catch(error => {
-    // Handle error
-    console.error(error);
-  });
-    console.log('gonna update');
-    console.log(docsToUpdate)
-    db.deleteAll("pTracker").then(res => {// delete it
-      db.push('pTracker', docsToUpdate) })
-                                  
-  
-}
-
-*/
-
-
-// socket.io on Connection setups
+// gallery socket
 gallery.on('connection', (socket) => {
-  console.log('gallery socket connected !!!! : ' + socket.id)
-  
+  console.log('gallery socket connected: ' + socket.id)
   socket.on('testEmit', (socket) => {
     console.log('got testEmit');
     combined.emit('updateCorpse', 'I got here via gallery');
     socket.join('corpse1')
-    
   });
-
 });
 
-
-/////////combined (corpse) socket
-//based on socket id on combined page
+// combined socket
 combined.on('connection', (socket) => {
-    
-  console.log('combined socket connected !!!!!!! : ' + socket.id);
+  console.log('combined socket connected: ' + socket.id);
   
   socket.on('privateDrawingRoom', (data) => {
     console.log('Combined: received room: ' + data.name);
-    console.log('Combined: received corpseRoom via room: ' + data.corpseRoom)
     socket.join(data.name);
     socket.join(data.corpseRoom);
     socket.roomName = data.name;
-
   });
   
   socket.on('corpseRoom', (data) => {
@@ -284,109 +198,92 @@ combined.on('connection', (socket) => {
     socket.join(data.name);
     socket.corpseName = data.name;
 
+    // send current lock state for this corpse
+    const currentLocks = [];
+    for (const key in locks) {
+      const [corpseName, section] = key.split('::');
+      if (corpseName === data.name) {
+        currentLocks.push({ section, status: locks[key] === 'done' ? 'done' : 'locked' });
+      }
+    }
+    socket.emit('currentLocks', { locks: currentLocks });
   });
   
   socket.on('selectedCanvas', (data) => {
-    console.log('combined client is sending the selected section');
-    console.log('Combined: selectedCanvas: ');
-    console.log(data);
-    combined.emit('updateCombinedCanvas', data);
-    //drawingSection.join(data)
-    console.log('Combined: selectedCanvas:RoomName: ' + socket.roomName);
-    console.log('Combined: selectedCanvas:CorpseName: ' + socket.corpseName);
-    //send only to the individual's Room
-    drawingSection.to(socket.roomName).emit('sendSelectedSection', {'section':data.section,'corpseRoom':socket.corpseName}); 
-    // input.emit('dataAll', data);
-  })
-    
-  socket.on('data', (data) => {
-      //Data can be numbers, strings, objects
-      console.log("Received 'data' msg");
-      console.log('Combined: data: ' + data);
-  
-      //Send the data back to the clients using .emit()
-      //Send data to ALL clients, including this one
-      drawingSection.emit('dataAll', data);
+  console.log('selectedCanvas - socket.corpseName:', socket.corpseName, 'socket.roomName:', socket.roomName);
+  console.log('data:', data);
+    console.log('Combined: selectedCanvas: ', data);
+    const key = data.corpseName + '::' + data.section;
 
-  })
-  
-})
-
-// individual drawing sections. only based on socket id -- 
-drawingSection.on('connection', (socket) => {
-    console.log('input socket connected : ' + socket.id);
-  // implicitly create a room right away -- so that all following interactions are in a room? 
-  // but user's first interaction is on combined page - that is a unique socket id for each person. 
-  // Maybe ask for their name? or make 'selecting' redirect them 
-  // need to figure out: when they select a section, just they are notified on drawingSection, but combined is updated for everyone.
-  
-  socket.on('privateDrawingRoom', (data) => {
-    console.log('DrawingSection: ReceivedRoom: ' + data.name);
-    console.log(data);
-    socket.join(data.name);
-    socket.roomName = data.name;
-    if (!socket.corpseRoom) {
-      console.log('do nothing');
-    } else {
-      console.log('corpseNAme!! : ' + socket.corpseName);
-   //   if (data.name.startsWith('rr')) {
-     //   socket.corpseName = 'corpse2';
-    //  } else {
-    //    socket.corpseName = 'corpse1';
-   //   }
+    // if already locked or done, deny
+    if (locks[key]) {
+      socket.emit('lockDenied', { section: data.section });
+      return;
     }
 
+    // grant the lock
+    locks[key] = socket.id;
+    socket.emit('lockGranted', { section: data.section });
+
+    combined.to(socket.corpseName).emit('sectionLocked', { section: data.section });
+    drawingSection.to(socket.roomName).emit('sendSelectedSection', { section: data.section, corpseRoom: socket.corpseName });
+  });
+    
+  socket.on('data', (data) => {
+    console.log("Received 'data' msg: " + data);
+    drawingSection.emit('dataAll', data);
+  });
+
+  /*socket.on('disconnect', () => {
+    console.log('combined socket disconnected: ' + socket.id);
+    for (const key in locks) {
+      if (locks[key] === socket.id) {
+        const [corpseName, section] = key.split('::');
+        delete locks[key];
+        combined.to(corpseName).emit('sectionUnlocked', { section });
+      }
+    }
+  });*/
+});
+
+// drawing section socket
+drawingSection.on('connection', (socket) => {
+  console.log('drawingSection socket connected: ' + socket.id);
+
+  socket.on('privateDrawingRoom', (data) => {
+    console.log('DrawingSection: ReceivedRoom: ' + data.name);
+    socket.join(data.name);
+    socket.roomName = data.name;
+    socket.corpseName = data.corpseRoom;
+    socket.section = data.section;
+
+    // transfer lock ownership to this socket
+    const key = data.corpseRoom + '::' + data.section;
+    if (locks[key]) {
+      locks[key] = socket.id;
+    }
   });
   
-    
-  // dont think data on is needed.
-  //Listen for messages from the client or socket events
-  drawingSection.on('data', (data) => {
-    //Data can be numbers, strings, objects
-    console.log("Received 'data' msg");
-    console.log('DrawingSectiong:data: ' + data);
-
-    //Send the data back to the clients using .emit()
-    //Send data to ALL clients, including this one
-    drawingSection.emit('dataAll', data);
-
-  })
-  
   socket.on('submitSection', (data) => {
-    console.log('input client has sent their completed canvas');
-    console.log(data);
-    console.log('DrawingSection: SubmitSection: roomName: '+ socket.roomName);
-    console.log('DrawingSection: SubmitSection: corpseName: '+ data.corpseName);
-    console.log('DrawingSection: SubmitSection: section: ' + data.section);
+    console.log('DrawingSection: submitSection: ', data.section, data.corpseName);
+    
+    // mark lock as done so disconnect won't release it
+    const key = data.corpseName + '::' + data.section;
+    locks[key] = 'done';
+
     updateCorpseInDB(data);
     combined.to(data.corpseName).emit('updateCombinedCanvas', data);
     drawingSection.emit('sectionSubmitted', data);
-      // input.emit('dataAll', data);
-    
-    // add to database here! first check if exists, then update as necessary.
-  //  db.get("pTracker").then(pData =>{
- //     let obj = {data: pData};
- //     if (pData.)
- //     res.json(obj);
- //   })
-    /*let obj = {
-    status:'new',
-    name: req.body.corpse_name,
-    image1: req.body.img1,
-    image1Status: 'unsubmitted',
-    image2: req.body.img2,
-    image2Status: 'unsubmitted',
-    image3: req.body.img3,
-    image3Status: 'unsubmitted'
-  };
-  db.push("pTracker",obj);
-  res.json({task:"sucess", 'corpseName': req.body.corpse_name});
-    */
-  })
-  
-  //Listen for this client to disconnect
-  drawingSection.on("disconnect", () => {
-    console.log("A client has disconnected: " + socket.id);
   });
 
-})
+  socket.on('disconnect', () => {
+    console.log('drawingSection socket disconnected: ' + socket.id);
+    for (const key in locks) {
+      if (locks[key] === socket.id) {
+        const [corpseName, section] = key.split('::');
+        delete locks[key];
+        combined.to(corpseName).emit('sectionUnlocked', { section });
+      }
+    }
+  });
+});

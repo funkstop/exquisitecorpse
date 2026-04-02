@@ -139,6 +139,10 @@ fetch("/getGallery")
       document.getElementById("emptyMsg").style.display = "block";
       return;
     }
+    if (data.task === "rate_limited") {
+      errorEl.innerHTML = "You've created too many corpses recently — try again in 15 minutes.";
+      errorEl.style.display = "block";
+    }
     for (let i = 0; i < data.data.length; i++) {
       let corpse = data.data[i];
       if (!corpse) continue;
