@@ -130,9 +130,11 @@ app.get('/getCorpse', (req, res)=> {
   });
 });
 
+/*
 app.get('/clearDB', (req, res) => {
     db.deleteAll("pTracker").then(() => res.send('cleared'));
 });
+*/
 
 function updateCorpseInDB(data) {
   db.get("pTracker").then(documents => {
